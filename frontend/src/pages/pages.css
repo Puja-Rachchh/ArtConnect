@@ -393,3 +393,696 @@
     flex-direction: column;
   }
 }
+
+/* Chat Styles */
+.chat-btn {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  margin-left: 0.5rem;
+}
+
+.chat-btn:hover {
+  background: rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
+}
+
+.chat-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.chat-overlay .chat-container {
+  width: 100%;
+  max-width: 450px;
+  max-height: 90vh;
+}
+
+/* Chats Page Styles */
+.chats-container {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 2rem;
+  height: 80vh;
+  max-height: 600px;
+}
+
+.chats-sidebar {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.chats-header {
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chats-header h2 {
+  margin: 0;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.conversation-count {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.no-conversations {
+  padding: 2rem;
+  text-align: center;
+  color: #ccc;
+}
+
+.no-conversations h3 {
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.conversations-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.conversation-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: background-color 0.3s;
+  position: relative;
+}
+
+.conversation-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.conversation-item.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-left: 3px solid #3b82f6;
+}
+
+.conversation-painting img {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.conversation-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.conversation-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.conversation-title h4 {
+  margin: 0;
+  color: white;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-time {
+  color: #ccc;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.conversation-participants {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.other-user {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.painting-price {
+  color: #10b981;
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.last-message {
+  color: #aaa;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unread-badge {
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+.chat-main {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-main .chat-container {
+  height: 100%;
+  width: 100%;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+
+.no-chat-selected {
+  text-align: center;
+  color: #ccc;
+  padding: 2rem;
+}
+
+.no-chat-selected h3 {
+  color: white;
+  margin-bottom: 1rem;
+}
+
+/* Responsive Design for Chats */
+@media (max-width: 768px) {
+  .chats-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: 300px 1fr;
+  }
+  
+  .chats-sidebar {
+    order: 1;
+  }
+  
+  .chat-main {
+    order: 2;
+  }
+  
+  .conversation-item {
+    padding: 0.8rem 1rem;
+  }
+  
+  .conversation-painting img {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Auction Styles */
+.auction-price {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.starting-price {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.current-bid {
+  color: #10b981;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.direct-price {
+  color: #10b981;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.auction-info {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.participant-count {
+  color: #ccc;
+  font-size: 0.8rem;
+}
+
+.auction-timer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(59, 130, 246, 0.2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: #3b82f6;
+  margin-top: 8px;
+}
+
+.auction-timer.expired {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.timer-icon {
+  font-size: 0.7rem;
+}
+
+.auction-btn, .join-auction-btn {
+  background: rgba(168, 85, 247, 0.3);
+  color: white;
+  border: 1px solid rgba(168, 85, 247, 0.5);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  margin-right: 0.5rem;
+}
+
+.auction-btn:hover, .join-auction-btn:hover {
+  background: rgba(168, 85, 247, 0.5);
+  transform: translateY(-1px);
+}
+
+.buy-btn {
+  background: rgba(16, 185, 129, 0.3);
+  color: white;
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  margin-right: 0.5rem;
+}
+
+.buy-btn:hover {
+  background: rgba(16, 185, 129, 0.5);
+  transform: translateY(-1px);
+}
+
+.sold-status, .auction-ended {
+  background: rgba(239, 68, 68, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.winner-info {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.8rem;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal-content {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: white;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.painting-preview {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+.painting-preview img {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.painting-preview h3 {
+  margin: 0 0 0.5rem 0;
+  color: white;
+}
+
+.painting-preview p {
+  margin: 0;
+  color: #10b981;
+  font-weight: bold;
+}
+
+.auction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-group label {
+  color: white;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select {
+  padding: 0.7rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9rem;
+}
+
+/* Specific styling for select dropdown options */
+.form-group select option {
+  background: #1f2937;
+  color: white;
+  padding: 0.5rem;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Ensure placeholder text is visible */
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn-primary {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #ccc;
+  border: 1px solid #ccc;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Auction Chat Styles */
+.auction-chat {
+  height: 600px;
+}
+
+.auction-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.auction-header-info h3 {
+  margin: 0;
+  color: white;
+  font-size: 1.2rem;
+}
+
+.auction-status {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.auction-details {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+}
+
+.bid-history h4 {
+  margin: 0 0 0.5rem 0;
+  color: white;
+  font-size: 1rem;
+}
+
+.bid-list {
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.bid-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  margin-bottom: 0.3rem;
+  font-size: 0.8rem;
+}
+
+.bid-item .bidder {
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.bid-item .amount {
+  color: #10b981;
+  font-weight: bold;
+}
+
+.bid-item .time {
+  color: #ccc;
+  font-size: 0.7rem;
+}
+
+.no-bids {
+  text-align: center;
+  color: #ccc;
+  font-style: italic;
+  padding: 1rem;
+}
+
+.bid-section {
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bid-input-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.bid-input-container input {
+  flex: 1;
+  padding: 0.7rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.bid-input-container input::placeholder {
+  color: #ccc;
+}
+
+.bid-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.bid-btn:hover {
+  background: #059669;
+}
+
+.message.system {
+  align-self: center;
+  max-width: 90%;
+}
+
+.message.system .message-content {
+  background: rgba(107, 114, 128, 0.2);
+  color: #d1d5db;
+  font-size: 0.9rem;
+  text-align: center;
+  border-radius: 15px;
+}
+
+.bid-message,
+.auction-end-message,
+.system-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bid-message .bid-content {
+  color: #10b981;
+  font-weight: bold;
+}
+
+.auction-end-message .end-content {
+  color: #ef4444;
+  font-weight: bold;
+}
+
+.system-message .system-content {
+  color: #6b7280;
+}
+
+.bid-icon,
+.end-icon,
+.system-icon {
+  font-size: 1rem;
+}

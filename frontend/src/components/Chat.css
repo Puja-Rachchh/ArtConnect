@@ -1,0 +1,362 @@
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  width: 400px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chat-painting-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-painting-info img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.chat-painting-info h4 {
+  margin: 0;
+  font-size: 14px;
+  color: white;
+}
+
+.chat-painting-info p {
+  margin: 0;
+  font-size: 12px;
+  color: #ccc;
+}
+
+.close-chat-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.close-chat-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message {
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+}
+
+.message.own {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.message.other {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.sender-name {
+  font-weight: bold;
+  color: #fff;
+}
+
+.message-time {
+  color: #ccc;
+}
+
+.message.own .message-header {
+  flex-direction: row-reverse;
+}
+
+.message-content {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 10px 15px;
+  border-radius: 15px;
+  color: white;
+  word-wrap: break-word;
+}
+
+.message.own .message-content {
+  background: rgba(59, 130, 246, 0.3);
+  border-bottom-right-radius: 5px;
+}
+
+.message.other .message-content {
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom-left-radius: 5px;
+}
+
+.auction-offer {
+  padding: 5px;
+}
+
+.auction-price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #10b981;
+  margin-bottom: 5px;
+}
+
+.auction-description {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.auction-status {
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.auction-status.pending {
+  color: #fbbf24;
+}
+
+.auction-status.accepted {
+  color: #10b981;
+}
+
+.auction-status.declined {
+  color: #ef4444;
+}
+
+.auction-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.accept-btn, .decline-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.accept-btn {
+  background: #10b981;
+  color: white;
+}
+
+.accept-btn:hover {
+  background: #059669;
+}
+
+.decline-btn {
+  background: #ef4444;
+  color: white;
+}
+
+.decline-btn:hover {
+  background: #dc2626;
+}
+
+.read-indicator {
+  font-size: 10px;
+  color: #10b981;
+  margin-top: 2px;
+}
+
+.typing-indicator {
+  font-style: italic;
+  color: #ccc;
+  font-size: 12px;
+  padding: 5px 10px;
+}
+
+.chat-input-area {
+  padding: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.auction-controls {
+  margin-bottom: 10px;
+}
+
+.auction-btn {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.auction-btn:hover {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+.auction-form {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.auction-form input,
+.auction-form textarea {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 14px;
+}
+
+.auction-form input::placeholder,
+.auction-form textarea::placeholder {
+  color: #ccc;
+}
+
+.auction-form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.send-offer-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.send-offer-btn:hover {
+  background: #059669;
+}
+
+.cancel-btn {
+  background: transparent;
+  color: #ccc;
+  border: 1px solid #ccc;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.message-input-container {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.message-input-container textarea {
+  flex: 1;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  color: white;
+  resize: none;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.message-input-container textarea::placeholder {
+  color: #ccc;
+}
+
+.message-input-container button {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.message-input-container button:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.5);
+}
+
+.message-input-container button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.chat-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: white;
+  font-size: 16px;
+}
+
+/* Scrollbar styling */
+.messages-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}

@@ -19,6 +19,9 @@ export default function Header() {
         <Link to="/" className="brand">🎨 ArtConnect</Link>
         <nav className="nav-links">
           <Link to="/">Home</Link>
+          {isAuthenticated && (
+            <Link to="/chats">Chats</Link>
+          )}
           {!isAuthenticated ? (
             <>
               <Link to="/signup">Sign Up</Link>

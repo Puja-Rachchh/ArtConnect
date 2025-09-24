@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: __dirname + '/.env' });
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -14,6 +14,8 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var authRouter = require('./routes/auth');
 var paintingsRouter = require('./routes/paintings');
+var chatRouter = require('./routes/chat');
+var auctionRouter = require('./routes/auction');
 
 var app = express();
 
@@ -38,6 +40,8 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/paintings', paintingsRouter);
+app.use('/api/chat', chatRouter);
+app.use('/api/auction', auctionRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
