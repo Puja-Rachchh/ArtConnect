@@ -18,9 +18,14 @@ export default function Header() {
       <div className="inner">
         <Link to="/" className="brand">🎨 ArtConnect</Link>
         <nav className="nav-links">
-          <Link to="/">Home</Link>
+          {isAuthenticated && user?.role === 'artist' && (
+            <Link to="/artist/dashboard">Dashboard</Link>
+          )}
           {isAuthenticated && (
             <Link to="/chats">Chats</Link>
+          )}
+          {isAuthenticated && user?.role === 'artist' && (
+            <Link to="/my-paintings">My Paintings</Link>
           )}
           {!isAuthenticated ? (
             <>

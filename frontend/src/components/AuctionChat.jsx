@@ -244,7 +244,7 @@ const AuctionChat = ({ paintingId, auctionInfo, onClose }) => {
           <h3>Auction Chat</h3>
           <div className="auction-status">
             <div className="current-bid">
-              Current Bid: ${auctionDetails?.currentBid || auctionDetails?.startingPrice || 0}
+              Current Bid: ₹{auctionDetails?.currentBid || auctionDetails?.startingPrice || 0}
             </div>
             <div className="participants">
               {auctionDetails?.participantCount || 0} participants

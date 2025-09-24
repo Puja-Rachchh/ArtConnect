@@ -152,7 +152,7 @@ const ChatsPage = () => {
                             {user.role === 'artist' ? 'Buyer' : 'Artist'}: {otherUser.username}
                           </span>
                           <span className="painting-price">
-                            ${conversation.paintingId.price}
+                            ₹{conversation.paintingId.price}
                           </span>
                         </div>
                         

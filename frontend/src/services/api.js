@@ -90,6 +90,13 @@ class ApiService {
     });
   }
 
+  static async updatePainting(id, updateData) {
+    return await this.request(`/paintings/update/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    });
+  }
+
   static logout() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');

@@ -114,7 +114,7 @@ const Chat = ({ conversationId, paintingInfo, onClose }) => {
 
     try {
       const response = await apiService.post(`/chat/conversations/${conversationId}/messages`, {
-        content: `Auction offer: $${auctionOffer.offerPrice}`,
+        content: `Auction offer: ₹${auctionOffer.offerPrice}`,
         messageType: 'auction_offer',
         auctionDetails: {
           offerPrice: parseFloat(auctionOffer.offerPrice),
@@ -180,7 +180,7 @@ const Chat = ({ conversationId, paintingInfo, onClose }) => {
           {message.messageType === 'auction_offer' ? (
             <div className="auction-offer">
               <div className="auction-price">
-                Offer: ${message.auctionDetails.offerPrice}
+                Offer: ₹{message.auctionDetails.offerPrice}
               </div>
               <div className="auction-description">
                 {message.auctionDetails.offerDescription}
@@ -229,7 +229,7 @@ const Chat = ({ conversationId, paintingInfo, onClose }) => {
           <img src={`http://localhost:3000${paintingInfo.imageUrl}`} alt={paintingInfo.title} />
           <div>
             <h4>{paintingInfo.title}</h4>
-            <p>${paintingInfo.price}</p>
+            <p>₹{paintingInfo.price}</p>
           </div>
         </div>
         <button onClick={onClose} className="close-chat-btn">×</button>

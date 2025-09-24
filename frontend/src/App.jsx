@@ -8,6 +8,7 @@ import Login from './pages/Login.jsx';
 import ArtistDashboard from './pages/ArtistDashboard.jsx';
 import BuyerMarketplace from './pages/BuyerMarketplace.jsx';
 import ChatsPage from './pages/ChatsPage.jsx';
+import MyPaintings from './pages/MyPaintings.jsx';
 import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
@@ -42,6 +43,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <ChatsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/my-paintings" 
+                element={
+                  <ProtectedRoute requiredRole="artist">
+                    <MyPaintings />
                   </ProtectedRoute>
                 } 
               />
