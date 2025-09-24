@@ -9,6 +9,7 @@ export default function Signup() {
   const { role } = useRole();
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [status, setStatus] = useState({ loading: false, message: '', error: '' });
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -55,14 +56,48 @@ export default function Signup() {
         <form onSubmit={handleSubmit} className="auth-form" style={{marginTop:'1.25rem'}}>
           <label>Name<input required name="name" value={form.name} onChange={handleChange} placeholder="Your display name" /></label>
           <label>Email<input required type="email" name="email" value={form.email} onChange={handleChange} placeholder="you@example.com" /></label>
-          <label>Password<input required type="password" name="password" value={form.password} onChange={handleChange} placeholder="••••••••" /></label>
-          {status.message && <p style={{fontSize:'.75rem', color:'#9ecbff', margin:0}}>{status.message}</p>}
+          <label>
+            Password
+            <div style={{position: 'relative', display: 'flex', alignItems: 'center'}}>
+              <input 
+                required 
+                type={showPassword ? "text" : "password"} 
+                name="password" 
+                value={form.password} 
+                onChange={handleChange} 
+                placeholder="••••••••"
+                style={{width: '100%', paddingRight: '3.5rem'}}
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '0.75rem',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  color: '#666',
+                  fontWeight: '500',
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '4px',
+                  transition: 'color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.color = '#333'}
+                onMouseLeave={(e) => e.target.style.color = '#666'}
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </label>
+          {status.message && <div className="status-success">{status.message}</div>}
           {status.error && (
-            <div style={{fontSize:'.75rem', color:'#ffb3b3', margin:0, padding:'.75rem', background:'rgba(255,179,179,0.1)', borderRadius:'8px', border:'1px solid rgba(255,179,179,0.3)'}}>
+            <div className="status-error">
               {status.error}
             </div>
           )}
-          {!role && <p style={{fontSize:'.7rem', color:'#ffb3b3', margin:0}}>Pick a role first on the Home page.</p>}
+          {!role && <div className="status-error">Pick a role first on the Home page.</div>}
           <button type="submit" disabled={!role || status.loading}>{status.loading? 'Creating…':'Sign Up'}</button>
           <p className="switch">Already have an account? <Link to="/login">Log In</Link></p>
         </form>

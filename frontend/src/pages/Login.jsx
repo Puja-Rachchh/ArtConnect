@@ -10,6 +10,7 @@ export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [status, setStatus] = useState({ loading: false, message: '', error: '' });
   const [roleSuggestion, setRoleSuggestion] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -95,36 +96,70 @@ export default function Login() {
               placeholder="you@example.com" 
             />
           </label>
-          <label>Password<input required type="password" name="password" value={form.password} onChange={handleChange} placeholder="••••••••" /></label>
+          <label>
+            Password
+            <div style={{position: 'relative', display: 'flex', alignItems: 'center'}}>
+              <input 
+                required 
+                type={showPassword ? "text" : "password"} 
+                name="password" 
+                value={form.password} 
+                onChange={handleChange} 
+                placeholder="Enter your password"
+                style={{width: '100%', paddingRight: '3.5rem'}}
+              />
+              <button 
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: 'absolute',
+                  right: '0.75rem',
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.85rem',
+                  color: '#666',
+                  fontWeight: '500',
+                  padding: '0.25rem 0.5rem',
+                  borderRadius: '4px',
+                  transition: 'color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.color = '#333'}
+                onMouseLeave={(e) => e.target.style.color = '#666'}
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </label>
           
           {/* Role suggestion when mismatch detected */}
           {roleSuggestion && (
-            <div style={{fontSize:'.75rem', color:'#ffd93d', margin:0, padding:'.75rem', background:'rgba(255,217,61,0.1)', borderRadius:'8px', border:'1px solid rgba(255,217,61,0.3)'}}>
+            <div className="status-warning">
               💡 This email is registered as <strong>{roleSuggestion}</strong>. 
               <button 
                 type="button" 
                 onClick={() => setRole(roleSuggestion)}
-                style={{marginLeft:'.5rem', padding:'.25rem .5rem', fontSize:'.7rem', background:'rgba(255,217,61,0.2)', border:'1px solid rgba(255,217,61,0.4)', borderRadius:'4px', color:'#ffd93d', cursor:'pointer'}}
+                style={{marginLeft:'0.5rem', padding:'0.25rem 0.5rem', fontSize:'0.8rem', background:'var(--warning)', border:'1px solid var(--warning)', borderRadius:'6px', color:'#ffffff', cursor:'pointer'}}
               >
                 Switch to {roleSuggestion}
               </button>
             </div>
           )}
           
-          {status.message && <p style={{fontSize:'.75rem', color:'#9ecbff', margin:0}}>{status.message}</p>}
+          {status.message && <div className="status-success">{status.message}</div>}
           {status.error && (
-            <div style={{fontSize:'.75rem', color:'#ffb3b3', margin:0, padding:'.75rem', background:'rgba(255,179,179,0.1)', borderRadius:'8px', border:'1px solid rgba(255,179,179,0.3)'}}>
+            <div className="status-error">
               {status.error}
               {status.error.includes('No') && status.error.includes('account found') && (
-                <div style={{marginTop:'.5rem'}}>
-                  <Link to="/signup" style={{color:'#9ecbff', textDecoration:'underline'}}>
+                <div style={{marginTop:'0.5rem'}}>
+                  <Link to="/signup" style={{color:'var(--error)', fontWeight:'600'}}>
                     Create a {role} account here
                   </Link>
                 </div>
               )}
             </div>
           )}
-          {!role && <p style={{fontSize:'.7rem', color:'#ffb3b3', margin:0}}>Pick a role first on the Home page.</p>}
+          {!role && <div className="status-error">Pick a role first on the Home page.</div>}
           <button type="submit" disabled={!role || status.loading}>{status.loading? 'Verifying…':'Log In'}</button>
           <p className="switch">No account yet? <Link to="/signup">Create one</Link></p>
         </form>

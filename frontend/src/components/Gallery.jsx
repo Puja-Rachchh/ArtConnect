@@ -24,13 +24,13 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
     try {
       setIsLoading(true);
       setError('');
-      console.log('🎨 Gallery: Fetching paintings...');
+      console.log('Fetching paintings...');
       const response = await ApiService.getPaintings();
-      console.log('🎨 Gallery: API response received:', response);
-      console.log('🎨 Gallery: Paintings array:', response.paintings);
+      console.log('API response received:', response);
+      console.log(' Paintings array:', response.paintings);
       setPaintings(response.paintings || []);
     } catch (err) {
-      console.error('🎨 Gallery: Error fetching paintings:', err);
+      console.error('Error fetching paintings:', err);
       setError(err.message || 'Failed to load paintings');
     } finally {
       setIsLoading(false);
@@ -103,6 +103,7 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
             <button 
               onClick={() => handleStartAuction(painting)}
               className="auction-btn"
+              style={{background:'#1937dfff'}}
             >
               Start Auction
             </button>
@@ -172,7 +173,7 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
   };
 
   if (isLoading) {
-    console.log('🎨 Gallery: Still loading...');
+    console.log(' Still loading...');
     return (
       <div className="gallery-container">
         <div className="loading">Loading paintings...</div>
