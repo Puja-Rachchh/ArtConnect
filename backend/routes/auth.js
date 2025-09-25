@@ -3,9 +3,9 @@ const User = require('../models/User');
 const { generateToken } = require('../middleware/auth');
 const router = express.Router();
 
-// @route   POST /api/auth/signup
-// @desc    Register a new user
-// @access  Public
+router.get('/auth', (req, res) => {
+  res.render('auth');
+});
 router.post('/signup', async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
@@ -87,9 +87,6 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/login
-// @desc    Authenticate user and get token
-// @access  Public
 router.post('/login', async (req, res) => {
   try {
     const { email, password, role } = req.body;
@@ -119,7 +116,6 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Check if user's registered role matches the selected role
     if (user.role !== role) {
       return res.status(403).json({
         success: false,
@@ -136,7 +132,7 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    // Generate JWT token
+  
     const token = generateToken(user._id);
 
     res.json({
@@ -160,9 +156,6 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// @route   POST /api/auth/check-email
-// @desc    Check if email exists and return registered role
-// @access  Public
 router.post('/check-email', async (req, res) => {
   try {
     const { email } = req.body;

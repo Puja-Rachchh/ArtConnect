@@ -5,9 +5,7 @@ const { authenticateToken } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const router = express.Router();
 
-// @route   GET /api/paintings
-// @desc    Get all paintings (for buyers and general viewing)
-// @access  Public
+
 router.get('/', async (req, res) => {
   try {
     const paintings = await Painting.find({ status: 'available' })
@@ -29,8 +27,7 @@ router.get('/', async (req, res) => {
 });
 
 // @route   GET /api/paintings/my-paintings
-// @desc    Get paintings by authenticated artist
-// @access  Private (Artist only)
+
 router.get('/my-paintings', authenticateToken, async (req, res) => {
   try {
     const paintings = await Painting.find({ artist: req.userId })
@@ -51,8 +48,7 @@ router.get('/my-paintings', authenticateToken, async (req, res) => {
 });
 
 // @route   POST /api/paintings/upload
-// @desc    Upload a new painting
-// @access  Private (Artist only)
+
 router.post('/upload', authenticateToken, upload.single('image'), async (req, res) => {
   try {
     // Check if user is an artist
@@ -136,8 +132,7 @@ router.post('/upload', authenticateToken, upload.single('image'), async (req, re
 });
 
 // @route   GET /api/paintings/:id
-// @desc    Get single painting by ID
-// @access  Public
+
 router.get('/:id', async (req, res) => {
   try {
     const painting = await Painting.findById(req.params.id)
@@ -167,9 +162,50 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// @route   PUT /api/paintings/:id
+router.put('/update/:id', authenticateToken, async (req, res) => {
+  try {
+    const painting = await Painting.findById(req.params.id);
+    
+    if (!painting) {
+      return res.status(404).json({
+        success: false,
+        message: 'Painting not found'
+      });
+    }
+
+    // Check if user owns this painting
+    if (painting.artist.toString() !== req.userId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You can only update your own paintings'
+      });
+    }
+
+    // Update the painting with new data
+    const updateData = req.body;
+    const updatedPainting = await Painting.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate('artist', 'name');
+
+    res.json({
+      success: true,
+      message: 'Painting updated successfully',
+      painting: updatedPainting
+    });
+  } catch (error) {
+    console.error('Update painting error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating painting'
+    });
+  }
+});
+
 // @route   DELETE /api/paintings/:id
-// @desc    Delete painting (artist only)
-// @access  Private
+
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
     const painting = await Painting.findById(req.params.id);
