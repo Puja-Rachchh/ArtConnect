@@ -9,6 +9,7 @@ import ArtistDashboard from './pages/ArtistDashboard.jsx';
 import BuyerMarketplace from './pages/BuyerMarketplace.jsx';
 import ChatsPage from './pages/ChatsPage.jsx';
 import MyPaintings from './pages/MyPaintings.jsx';
+import MyCollection from './pages/MyCollection.jsx';
 import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 
@@ -53,6 +54,14 @@ function App() {
                     <MyPaintings />
                   </ProtectedRoute>
                 } 
+              />
+              <Route 
+                path="/my-collection"
+                element={
+                  <ProtectedRoute requiredRole="buyer">
+                    <MyCollection />
+                  </ProtectedRoute>
+                }
               />
             </Routes>
           </Layout>

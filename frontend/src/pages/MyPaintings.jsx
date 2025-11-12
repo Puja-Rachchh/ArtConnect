@@ -9,6 +9,10 @@ const MyPaintings = () => {
   const [error, setError] = useState('');
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingPainting, setEditingPainting] = useState(null);
+  const [showBidsModal, setShowBidsModal] = useState(false);
+  const [bidsLoading, setBidsLoading] = useState(false);
+  const [bidsForPainting, setBidsForPainting] = useState([]);
+  const [bidsPainting, setBidsPainting] = useState(null);
   const { user } = useRole();
 
   useEffect(() => {
@@ -19,12 +23,9 @@ const MyPaintings = () => {
     try {
       setIsLoading(true);
       setError('');
-      const response = await ApiService.getPaintings();
-      // Filter paintings to only show the current user's paintings
-      const myPaintings = response.paintings.filter(painting => 
-        painting.artist?._id === user?.id || painting.artist === user?.id
-      );
-      setPaintings(myPaintings);
+      // Use the authenticated endpoint to fetch only the current artist's paintings
+      const response = await ApiService.getMyPaintings();
+      setPaintings(response.paintings || []);
     } catch (err) {
       console.error('Error fetching my paintings:', err);
       setError(err.message || 'Failed to load paintings');
@@ -50,6 +51,41 @@ const MyPaintings = () => {
     } catch (error) {
       console.error('Error deleting painting:', error);
       alert('Failed to delete painting. Please try again.');
+    }
+  };
+
+  const handleViewBids = async (painting) => {
+    setBidsPainting(painting);
+    setShowBidsModal(true);
+    setBidsLoading(true);
+    try {
+      const resp = await ApiService.getBids(painting._id);
+      if (resp.success) {
+        setBidsForPainting(resp.bids || []);
+      } else {
+        setBidsForPainting([]);
+      }
+    } catch (err) {
+      console.error('Error fetching bids:', err);
+      setBidsForPainting([]);
+    } finally {
+      setBidsLoading(false);
+    }
+  };
+
+  const handleAcceptBid = async (bidId) => {
+    if (!bidsPainting) return;
+    if (!window.confirm('Accept this bid and mark painting as sold?')) return;
+    try {
+      const resp = await ApiService.acceptBid(bidsPainting._id, bidId);
+      if (resp.success) {
+        alert('Bid accepted. Painting marked as sold.');
+        setShowBidsModal(false);
+        fetchMyPaintings();
+      }
+    } catch (err) {
+      console.error('Error accepting bid:', err);
+      alert(err.message || 'Failed to accept bid');
     }
   };
 
@@ -81,9 +117,9 @@ const MyPaintings = () => {
 
   return (
     <div className="page">
-      <div className="page-header">
-        <h1>My Paintings</h1>
-        <p>Manage all your uploaded artwork</p>
+      <div className="page-header" >
+        <h1 align="center">My Paintings</h1>
+        <p align="center">Manage all your uploaded artwork</p>
       </div>
 
       {paintings.length === 0 ? (
@@ -154,13 +190,13 @@ const MyPaintings = () => {
                 }}>
                   <span style={{
                     padding: '0.25rem 0.5rem',
-                    backgroundColor: painting.saleType === 'auction' ? 'var(--accent-light)' : 'var(--success-light)',
-                    color: painting.saleType === 'auction' ? 'var(--accent)' : 'var(--success)',
+                    backgroundColor: 'var(--success-light)',
+                    color: 'var(--success)',
                     borderRadius: '4px',
                     fontSize: '0.8rem',
                     fontWeight: '500'
                   }}>
-                    {painting.saleType === 'auction' ? 'Auction' : 'Direct Sale'}
+                    Direct Sale
                   </span>
                   <span style={{
                     padding: '0.25rem 0.5rem',
@@ -197,6 +233,27 @@ const MyPaintings = () => {
                 >
                   Edit
                 </button>
+                {(painting.auction && painting.auction.bids && painting.auction.bids.length > 0) && (
+                  <button
+                    onClick={() => handleViewBids(painting)}
+                    aria-label={`View ${painting.auction.bids.length} bids`}
+                    style={{
+                      flex: 1,
+                      padding: '0.9rem',
+                      backgroundColor: '#059669',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      fontWeight: '700',
+                      transition: 'transform 0.15s, box-shadow 0.15s',
+                      boxShadow: '0 8px 20px rgba(5,150,105,0.12)'
+                    }}
+                  >
+                    ⚡ View Bids ({painting.auction.bids.length})
+                  </button>
+                )}
                 <button
                   onClick={() => handleDelete(painting._id)}
                   style={{
@@ -228,6 +285,43 @@ const MyPaintings = () => {
           onSuccess={handleUpdateSuccess}
         />
       )}
+      {/* Bids Modal */}
+      {showBidsModal && bidsPainting && (
+        <div className="modal-overlay" onClick={() => setShowBidsModal(false)}>
+          <div className="modal-content bids-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '760px', width: '95%', padding: '1.25rem' }}>
+            <div className="modal-header" style={{ padding: '1rem 1.25rem' }}>
+              <h3 style={{ margin: 0 }}>Bids for "{bidsPainting.title}"</h3>
+              <button onClick={() => setShowBidsModal(false)} className="modal-close">×</button>
+            </div>
+
+            <div className="modal-body" style={{ padding: '1rem 1.25rem' }}>
+              {bidsLoading ? (
+                <div className="no-bids">Loading bids...</div>
+              ) : (
+                <div>
+                  {bidsForPainting.length === 0 ? (
+                    <div className="no-bids">No bids yet.</div>
+                  ) : (
+                    <div className="bids-list">
+                      {bidsForPainting.map((bid) => (
+                        <div key={bid._id} className="bid-entry">
+                          <div className="bid-left">
+                            <div className="bidder">{bid.bidderName || (bid.bidder && bid.bidder.name) || 'Buyer'}</div>
+                            <div className="bid-meta">₹{bid.amount} • {new Date(bid.timestamp).toLocaleString()}</div>
+                          </div>
+                          <div className="bid-right">
+                            <button onClick={() => handleAcceptBid(bid._id)} className="accept-btn">Accept</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -239,8 +333,8 @@ const EditPaintingModal = ({ painting, onClose, onSuccess }) => {
     description: painting.description || '',
     price: painting.price || '',
     materials: painting.materials || '',
-    width: painting.width || '',
-    height: painting.height || '',
+    width: painting.size.width || '',
+    height: painting.size.height || '',
     tags: Array.isArray(painting.tags) ? painting.tags.join(', ') : (painting.tags || ''),
     saleType: painting.saleType || 'direct_sale'
   });
@@ -425,7 +519,6 @@ const EditPaintingModal = ({ painting, onClose, onSuccess }) => {
                   }}
                 >
                   <option value="direct_sale">Direct Sale</option>
-                  <option value="auction">Auction</option>
                 </select>
               </div>
             </div>

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import ApiService from '../services/api';
-import AuctionChat from './AuctionChat';
-import AuctionTimer from './AuctionTimer';
 import ShippingModal from './ShippingModal';
 import { useRole } from '../context/RoleContext';
 import apiService from '../services/apiService';
@@ -11,10 +9,7 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
   const [paintings, setPaintings] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [selectedAuction, setSelectedAuction] = useState(null);
-  const [showAuctionModal, setShowAuctionModal] = useState(false);
-  const [isAuctionChat, setIsAuctionChat] = useState(false);
+  // Auction feature removed — kept bidding/offers flow for direct sales
   const [selectedPainting, setSelectedPainting] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showShippingModal, setShowShippingModal] = useState(false);
@@ -56,13 +51,34 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
   };
 
   const handleChatWithArtist = async (painting) => {
-    // This function is now removed as per user request
+    // Live chat removed per requirement — kept as placeholder
   };
 
-  const closeChatWindow = () => {
-    setSelectedChat(null);
-    setSelectedAuction(null);
-    setIsAuctionChat(false);
+  // Bid UI state
+  const [bidAmount, setBidAmount] = useState('');
+  const [bidError, setBidError] = useState('');
+
+  // place a bid (buyers)
+  const handlePlaceBid = async (painting, amount) => {
+    try {
+      setBidError('');
+      if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+        setBidError('Enter a valid bid amount');
+        return;
+      }
+
+      const resp = await ApiService.placeBid(painting._id, Number(amount));
+      if (resp.success) {
+        alert('Bid placed successfully');
+        // refresh paintings so currentBid updates
+        fetchPaintings();
+        // clear local bid input
+        setBidAmount('');
+      }
+    } catch (err) {
+      console.error('Error placing bid:', err);
+      setBidError(err.message || 'Failed to place bid');
+    }
   };
 
   const handleViewPainting = (painting) => {
@@ -75,24 +91,9 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
     setShowDetailModal(false);
   };
 
-  const handleStartAuction = (painting) => {
-    setSelectedAuction(painting);
-    setShowAuctionModal(true);
-  };
+  // Start auction removed
 
-  const handleJoinAuction = async (painting) => {
-    try {
-      const response = await apiService.post(`/auction/paintings/${painting._id}/auction/join`);
-      if (response.success) {
-        // Open auction chat
-        setSelectedChat(painting);
-        setIsAuctionChat(true);
-      }
-    } catch (error) {
-      console.error('Error joining auction:', error);
-      setError(error.message || 'Failed to join auction');
-    }
-  };
+  // (old auction chat/join removed)
 
   const handleBuyNow = async (painting) => {
     // Open shipping modal instead of immediate purchase
@@ -137,8 +138,7 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
 
   const renderPaintingActions = (painting) => {
     const isOwner = userRole === 'artist' && painting.artist?._id === user?.id;
-    const isAuction = painting.saleType === 'auction';
-    const isActiveAuction = painting.auction?.isActive;
+  // Auction removed; use direct sale / offer flow
 
     // Always show view button first
     const viewButton = (
@@ -166,15 +166,6 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
       return (
         <div className="painting-actions">
           {viewButton}
-          {!isActiveAuction && painting.status === 'available' && (
-            <button 
-              onClick={() => handleStartAuction(painting)}
-              className="auction-btn"
-              style={{background:'#1937dfff'}}
-            >
-              Start Auction
-            </button>
-          )}
           <button 
             onClick={() => handleDeletePainting(painting._id)}
             className="delete-btn"
@@ -186,36 +177,28 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
     }
 
     if (userRole === 'buyer') {
-      if (isAuction && isActiveAuction) {
+      if (painting.status === 'available') {
         return (
           <div className="painting-actions">
-            <div className="auction-info">
-              <div className="current-bid">
-                Current Bid: ₹{painting.auction.currentBid || painting.auction.startingPrice}
-              </div>
-              <div className="participant-count">
-                {painting.auction.participantCount || 0} participants
-              </div>
+            {viewButton}
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <input
+                type="number"
+                min={painting.price}
+                step="1"
+                placeholder={`Minimum ₹${painting.price}`}
+                value={bidAmount}
+                onChange={(e) => setBidAmount(e.target.value)}
+                style={{ padding: '0.5rem 0.75rem', border: '1px solid #d1d5db', borderRadius: '6px', width: '140px' }}
+              />
+              <button
+                onClick={() => handlePlaceBid(painting, bidAmount)}
+                className="bid-btn"
+                style={{ padding: '0.65rem 1rem', border: 'none', backgroundColor: 'var(--accent)', color: '#fff', borderRadius: '6px', cursor: 'pointer', fontWeight: '600' }}
+              >
+                Bid Now
+              </button>
             </div>
-            {viewButton}
-            <button 
-              onClick={() => handleJoinAuction(painting)}
-              className="join-auction-btn"
-            >
-              Take Part in Auction
-            </button>
-          </div>
-        );
-      } else if (painting.status === 'available' && painting.saleType === 'direct_sale') {
-        return (
-          <div className="painting-actions">
-            {viewButton}
-            <button 
-              onClick={() => handleBuyNow(painting)}
-              className="buy-btn"
-            >
-              Buy Now - ₹{painting.price}
-            </button>
           </div>
         );
       } else if (painting.status === 'sold') {
@@ -223,18 +206,6 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
           <div className="painting-actions">
             {viewButton}
             <div className="sold-status">SOLD</div>
-          </div>
-        );
-      } else if (isAuction && !isActiveAuction) {
-        return (
-          <div className="painting-actions">
-            {viewButton}
-            <div className="auction-ended">Auction Ended</div>
-            {painting.auction.winner && (
-              <div className="winner-info">
-                Won for ₹{painting.auction.currentBid}
-              </div>
-            )}
           </div>
         );
       }
@@ -309,16 +280,7 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
                     
                     <div className="painting-details">
                       <div className="price-section">
-                        {painting.saleType === 'auction' && painting.auction?.isActive ? (
-                          <div className="auction-price">
-                            <div className="starting-price">Starting: &#8377;{painting.auction.startingPrice}</div>
-                            {painting.auction.currentBid > 0 && (
-                              <div className="current-bid">Current: &#8377;{painting.auction.currentBid}</div>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="direct-price">₹{painting.price}</div>
-                        )}
+                        <div className="direct-price">₹{painting.price}</div>
                       </div>
                       
                       {(painting.width || painting.size?.width) && (painting.height || painting.size?.height) && (
@@ -343,11 +305,7 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
                         </div>
                       )}
                       
-                      {painting.saleType === 'auction' && painting.auction?.endTime && (
-                        <div className="auction-timer">
-                          <AuctionTimer endTime={painting.auction.endTime} />
-                        </div>
-                      )}
+                      {/* Auction timer removed — only direct sale UI shown */}
                     </div>
 
                     {renderPaintingActions(painting)}
@@ -369,34 +327,9 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
         </div>
       )}
 
-      {/* Chat Window */}
-      {selectedChat && (
-        <div className="chat-overlay">
-          {isAuctionChat ? (
-            <AuctionChat
-              paintingId={selectedChat._id}
-              auctionInfo={selectedChat.auction}
-              onClose={closeChatWindow}
-            />
-          ) : null}
-        </div>
-      )}
+      {/* Chat Window removed per requirement (live auction chat disabled) */}
 
-      {/* Auction Modal */}
-      {showAuctionModal && selectedAuction && (
-        <AuctionModal
-          painting={selectedAuction}
-          onClose={() => {
-            setShowAuctionModal(false);
-            setSelectedAuction(null);
-          }}
-          onAuctionStarted={() => {
-            fetchPaintings(); // Refresh paintings list
-            setShowAuctionModal(false);
-            setSelectedAuction(null);
-          }}
-        />
-      )}
+      {/* Auction functionality removed */}
 
       {/* Painting Detail Modal */}
       {showDetailModal && selectedPainting && (
@@ -405,7 +338,6 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
           userRole={userRole}
           onClose={closeDetailModal}
           onBuyNow={handleBuyNow}
-          onJoinAuction={handleJoinAuction}
         />
       )}
 
@@ -420,124 +352,12 @@ const Gallery = ({ userRole, onUploadClick, refreshTrigger }) => {
   );
 };
 
-// Auction Modal Component
-const AuctionModal = ({ painting, onClose, onAuctionStarted }) => {
-  const [auctionData, setAuctionData] = useState({
-    duration: 24, // hours
-    startingPrice: painting.price,
-    bidIncrement: 10
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleStartAuction = async () => {
-    try {
-      setIsLoading(true);
-      setError('');
-
-      console.log('Starting auction for painting:', painting._id);
-      console.log('Auction data:', auctionData);
-      console.log('Auth token available:', !!localStorage.getItem('authToken'));
-
-      const response = await apiService.post(`/auction/paintings/${painting._id}/auction/start`, auctionData);
-      
-      console.log('Auction start response:', response);
-      
-      if (response.success) {
-        onAuctionStarted();
-      }
-    } catch (error) {
-      console.error('Error starting auction:', error);
-      setError(error.message || 'Failed to start auction');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="modal-overlay">
-      <div className="modal-content auction-modal">
-        <div className="modal-header">
-          <h2>Start Auction</h2>
-          <button onClick={onClose} className="modal-close">×</button>
-        </div>
-
-        <div className="modal-body">
-          <div className="painting-preview">
-            <img src={`http://localhost:3000${painting.imageUrl}`} alt={painting.title} />
-            <div>
-              <h3>{painting.title}</h3>
-              <p>Current Price: ₹{painting.price}</p>
-            </div>
-          </div>
-
-          {error && (
-            <div className="error-box">
-              {error}
-            </div>
-          )}
-
-          <div className="auction-form">
-            <div className="form-group">
-              <label>Duration (hours)</label>
-              <select
-                value={auctionData.duration}
-                onChange={(e) => setAuctionData(prev => ({...prev, duration: parseInt(e.target.value)}))}
-              >
-                <option value={1}>1 hour</option>
-                <option value={6}>6 hours</option>
-                <option value={12}>12 hours</option>
-                <option value={24}>24 hours</option>
-                <option value={48}>48 hours</option>
-                <option value={72}>72 hours</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Starting Price (₹)</label>
-              <input
-                type="number"
-                min="1"
-                value={auctionData.startingPrice}
-                onChange={(e) => setAuctionData(prev => ({...prev, startingPrice: parseFloat(e.target.value)}))}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Minimum Bid Increment (₹)</label>
-              <input
-                type="number"
-                min="1"
-                value={auctionData.bidIncrement}
-                onChange={(e) => setAuctionData(prev => ({...prev, bidIncrement: parseFloat(e.target.value)}))}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="modal-footer">
-          <button onClick={onClose} className="btn-secondary">
-            Cancel
-          </button>
-          <button 
-            onClick={handleStartAuction} 
-            className="btn-primary"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Starting...' : 'Start Auction'}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+// Auction functionality removed — auction modal and start-auction flows are no longer supported.
 
 // Painting Detail Modal Component
-const PaintingDetailModal = ({ painting, userRole, onClose, onBuyNow, onJoinAuction }) => {
-  const isAuction = painting.saleType === 'auction';
-  const isActiveAuction = painting.auction?.isActive;
-  const canBuy = userRole === 'buyer' && painting.status === 'available' && painting.saleType === 'direct_sale';
-  const canJoinAuction = userRole === 'buyer' && isAuction && isActiveAuction;
+const PaintingDetailModal = ({ painting, userRole, onClose, onBuyNow }) => {
+  // Auction removed — keep direct sale / bid-offer flow
+  const canBuy = userRole === 'buyer' && painting.status === 'available';
 
   return (
     <div className="modal-overlay" style={{
@@ -622,42 +442,21 @@ const PaintingDetailModal = ({ painting, userRole, onClose, onBuyNow, onJoinAuct
               marginBottom: '1rem'
             }}>by {painting.artist?.name || painting.artistName || 'Unknown Artist'}</p>
 
-            {/* Price Section */}
+            {/* Price Section (direct sale only) */}
             <div style={{
               padding: '1rem',
               backgroundColor: 'var(--bg-secondary)',
               borderRadius: 'var(--radius)',
               marginBottom: '1.5rem'
             }}>
-              {isAuction && isActiveAuction ? (
-                <div>
-                  <div style={{fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem'}}>
-                    Starting Price
-                  </div>
-                  <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--accent)'}}>
-                    ₹{painting.auction.startingPrice}
-                  </div>
-                  {painting.auction.currentBid > 0 && (
-                    <>
-                      <div style={{fontSize: '0.9rem', color: 'var(--text-muted)', marginTop: '0.5rem'}}>
-                        Current Bid
-                      </div>
-                      <div style={{fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--success)'}}>
-                        ₹{painting.auction.currentBid}
-                      </div>
-                    </>
-                  )}
+              <div>
+                <div style={{fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem'}}>
+                  Price
                 </div>
-              ) : (
-                <div>
-                  <div style={{fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '0.5rem'}}>
-                    Price
-                  </div>
-                  <div style={{fontSize: '2rem', fontWeight: 'bold', color: 'var(--success)'}}>
-                    ₹{painting.price}
-                  </div>
+                <div style={{fontSize: '2rem', fontWeight: 'bold', color: 'var(--success)'}}>
+                  ₹{painting.price}
                 </div>
-              )}
+              </div>
             </div>
 
             {/* Description */}
@@ -692,7 +491,7 @@ const PaintingDetailModal = ({ painting, userRole, onClose, onBuyNow, onJoinAuct
                 )}
                 <div>
                   <strong>Sale Type:</strong><br/>
-                  {painting.saleType === 'auction' ? 'Auction' : 'Direct Sale'}
+                  Direct Sale
                 </div>
                 <div>
                   <strong>Status:</strong><br/>
@@ -765,46 +564,26 @@ const PaintingDetailModal = ({ painting, userRole, onClose, onBuyNow, onJoinAuct
             Close
           </button>
           
-          {canJoinAuction && (
-            <button 
-              onClick={() => {
-                onJoinAuction(painting);
-                onClose();
-              }}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: 'none',
-                backgroundColor: 'var(--accent)',
-                color: '#ffffff',
-                borderRadius: 'var(--radius)',
-                cursor: 'pointer',
-                fontSize: '0.95rem',
-                fontWeight: '600'
-              }}
-            >
-              Join Auction
-            </button>
-          )}
+          {/* Auction bidding removed; buyers can place offers via Bid Now below when painting is available */}
           
           {canBuy && (
-            <button 
-              onClick={() => {
-                onBuyNow(painting);
-                onClose();
-              }}
-              style={{
-                padding: '0.75rem 1.5rem',
-                border: 'none',
-                backgroundColor: 'var(--success)',
-                color: '#ffffff',
-                borderRadius: 'var(--radius)',
-                cursor: 'pointer',
-                fontSize: '0.95rem',
-                fontWeight: '600'
-              }}
-            >
-              Buy Now - ₹{painting.price}
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <input
+                type="number"
+                min={painting.price}
+                step="1"
+                placeholder={`Minimum ₹${painting.price}`}
+                value={bidAmount}
+                onChange={(e) => setBidAmount(e.target.value)}
+                style={{ padding: '0.5rem 0.75rem', border: '1px solid #d1d5db', borderRadius: '6px', width: '160px' }}
+              />
+              <button
+                onClick={() => { handlePlaceBid(painting, bidAmount); onClose(); }}
+                style={{ padding: '0.75rem 1.25rem', border: 'none', backgroundColor: 'var(--success)', color: '#fff', borderRadius: '6px', cursor: 'pointer', fontSize: '0.95rem', fontWeight: '600' }}
+              >
+                Bid Now
+              </button>
+            </div>
           )}
         </div>
       </div>

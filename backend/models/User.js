@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema({
     enum: ['artist', 'buyer'],
     default: 'buyer'
   }
+  
 }, {
   timestamps: true
 });

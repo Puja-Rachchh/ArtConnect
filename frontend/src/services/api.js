@@ -97,6 +97,31 @@ class ApiService {
     });
   }
 
+  // Bidding APIs
+  static async placeBid(paintingId, amount) {
+    return await this.request(`/paintings/${paintingId}/bids`, {
+      method: 'POST',
+      body: JSON.stringify({ amount }),
+    });
+  }
+
+  static async getBids(paintingId) {
+    return await this.request(`/paintings/${paintingId}/bids`);
+  }
+
+  static async acceptBid(paintingId, bidId) {
+    return await this.request(`/paintings/${paintingId}/bids/${bidId}/accept`, {
+      method: 'POST'
+    });
+  }
+
+  // Orders / purchases
+  static async getMyOrders() {
+    return await this.request('/orders/my');
+  }
+
+  // (Notifications removed)
+
   static logout() {
     localStorage.removeItem('authToken');
     localStorage.removeItem('user');

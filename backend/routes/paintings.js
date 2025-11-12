@@ -8,10 +8,11 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    const paintings = await Painting.find({ status: 'available' })
+    // Return all paintings (including sold) so gallery and dashboard can show sold items with a SOLD tag.
+    const paintings = await Painting.find({})
       .populate('artist', 'name')
       .sort({ createdAt: -1 });
-    
+
     res.json({
       success: true,
       count: paintings.length,
@@ -162,6 +163,147 @@ router.get('/:id', async (req, res) => {
   }
 });
 
+// @route   GET /api/paintings/:id/bids
+router.get('/:id/bids', authenticateToken, async (req, res) => {
+  try {
+    const painting = await Painting.findById(req.params.id).populate('auction.bids.bidder', 'name email');
+    if (!painting) {
+      return res.status(404).json({ success: false, message: 'Painting not found' });
+    }
+
+    // Only artist or authenticated users can view bids list (artist usually needs it)
+    if (painting.artist.toString() !== req.userId) {
+      return res.status(403).json({ success: false, message: 'Only the artist can view bids for this painting' });
+    }
+
+    res.json({ success: true, bids: painting.auction.bids || [] });
+  } catch (error) {
+    console.error('Get bids error:', error);
+    res.status(500).json({ success: false, message: 'Error fetching bids' });
+  }
+});
+
+// @route   POST /api/paintings/:id/bids
+router.post('/:id/bids', authenticateToken, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    if (amount == null) {
+      return res.status(400).json({ success: false, message: 'Bid amount is required' });
+    }
+
+    const painting = await Painting.findById(req.params.id);
+    if (!painting) {
+      return res.status(404).json({ success: false, message: 'Painting not found' });
+    }
+
+    const bidder = await User.findById(req.userId);
+    if (!bidder) {
+      return res.status(403).json({ success: false, message: 'Invalid user' });
+    }
+
+    // If painting is an auction, use model method which enforces auction rules
+    if (painting.saleType === 'auction') {
+      if (!painting.auction?.isActive) {
+        return res.status(400).json({ success: false, message: 'This auction is not active' });
+      }
+
+      try {
+        await painting.placeBid(req.userId, bidder.name || bidder.username || 'Unknown', parseFloat(amount));
+      } catch (err) {
+        return res.status(400).json({ success: false, message: err.message });
+      }
+
+      // Return latest auction state
+      const updated = await Painting.findById(req.params.id).populate('auction.bids.bidder', 'name email');
+      return res.json({ success: true, message: 'Bid placed', auction: updated.auction });
+    }
+
+    // If painting is a direct sale, accept offers (bids) from buyers — store them in auction.bids for the artist to review
+    if (painting.saleType === 'direct_sale') {
+      const numericAmount = parseFloat(amount);
+      if (isNaN(numericAmount) || numericAmount < painting.price) {
+        return res.status(400).json({ success: false, message: `Offer must be at least ₹${painting.price}` });
+      }
+
+      // Ensure auction subdocument exists
+      if (!painting.auction) painting.auction = {};
+      if (!Array.isArray(painting.auction.bids)) painting.auction.bids = [];
+
+      painting.auction.bids.push({
+        bidder: req.userId,
+        bidderName: bidder.name || bidder.username || 'Buyer',
+        amount: numericAmount,
+        timestamp: new Date()
+      });
+
+      // Update currentBid to highest offer
+      const maxBid = Math.max(...painting.auction.bids.map(b => b.amount));
+      painting.auction.currentBid = maxBid;
+
+      const uniqueBidders = [...new Set(painting.auction.bids.map(bid => bid.bidder.toString()))];
+      painting.auction.participantCount = uniqueBidders.length;
+
+      await painting.save();
+
+      const updated = await Painting.findById(req.params.id).populate('auction.bids.bidder', 'name email');
+      return res.json({ success: true, message: 'Offer submitted', auction: updated.auction });
+    }
+
+    // Other sale types are not open to bidding
+    return res.status(400).json({ success: false, message: 'This painting is not open for bidding' });
+  } catch (error) {
+    console.error('Place bid error:', error);
+    res.status(500).json({ success: false, message: 'Error placing bid' });
+  }
+});
+
+// @route   POST /api/paintings/:id/bids/:bidId/accept
+router.post('/:id/bids/:bidId/accept', authenticateToken, async (req, res) => {
+  try {
+    const painting = await Painting.findById(req.params.id);
+    if (!painting) {
+      return res.status(404).json({ success: false, message: 'Painting not found' });
+    }
+
+    // Only artist can accept bids
+    if (painting.artist.toString() !== req.userId) {
+      return res.status(403).json({ success: false, message: 'Only the artist can accept a bid' });
+    }
+
+    const bid = painting.auction.bids.id(req.params.bidId);
+    if (!bid) {
+      return res.status(404).json({ success: false, message: 'Bid not found' });
+    }
+
+    // Set winner and mark painting sold
+        painting.auction.winner = bid.bidder;
+        painting.status = 'sold';
+        // store final sale price
+        painting.price = bid.amount;
+        await painting.save();
+
+        // Create an Order record (no notifications)
+        try {
+          const Order = require('../models/Order');
+          const order = new Order({
+            buyer: bid.bidder,
+            artist: painting.artist,
+            painting: painting._id,
+            price: bid.amount
+          });
+          await order.save();
+
+          res.json({ success: true, message: 'Bid accepted', buyerId: bid.bidder, amount: bid.amount, orderId: order._id });
+        } catch (err) {
+          console.error('Error creating order:', err);
+          return res.status(500).json({ success: false, message: 'Bid accepted but failed to create order' });
+        }
+  } catch (error) {
+    console.error('Accept bid error:', error);
+    res.status(500).json({ success: false, message: 'Error accepting bid' });
+  }
+});
+
 // @route   PUT /api/paintings/:id
 router.put('/update/:id', authenticateToken, async (req, res) => {
   try {
@@ -184,6 +326,7 @@ router.put('/update/:id', authenticateToken, async (req, res) => {
 
     // Update the painting with new data
     const updateData = req.body;
+    console.log(updateData);
     const updatedPainting = await Painting.findByIdAndUpdate(
       req.params.id,
       updateData,

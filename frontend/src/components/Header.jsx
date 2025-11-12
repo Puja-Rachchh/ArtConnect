@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { useRole } from '../context/RoleContext.jsx';
+import ApiService from '../services/api';
 import './header.css';
 
 export default function Header() {
@@ -13,6 +15,8 @@ export default function Header() {
     navigate('/');
   };
 
+  const [showNotif, setShowNotif] = useState(false);
+
   return (
     <header className={`site-header ${hideOnLanding ? 'landing-transparent' : ''}`}>
       <div className="inner">
@@ -21,8 +25,12 @@ export default function Header() {
           {isAuthenticated && user?.role === 'artist' && (
             <Link to="/artist/dashboard">Dashboard</Link>
           )}
-          {isAuthenticated && (
+          {/* Hide Chats link for artist users per requirement; show for other authenticated users */}
+          {isAuthenticated && user?.role !== 'artist' && (
             <Link to="/chats">Chats</Link>
+          )}
+          {isAuthenticated && user?.role === 'buyer' && (
+            <Link to="/my-collection">My Collection</Link>
           )}
           {isAuthenticated && user?.role === 'artist' && (
             <Link to="/my-paintings">My Paintings</Link>
@@ -39,6 +47,8 @@ export default function Header() {
           )}
         </nav>
         <div className="right">
+          {/* Notification system removed */}
+
           {isAuthenticated && user && (
             <span className="pill user-pill">
               {user.name} ({user.role})
